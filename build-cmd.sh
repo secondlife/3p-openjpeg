@@ -10,8 +10,8 @@ set -e
 set -u
 
 OPENJPEG_SOURCE_DIR="openjpeg"
-#define OPENJPEG_VERSION "2.0.0"
-if true                         # pre-2.0
+
+if false
 then
     openjpeg="openjpeg"
     verfile="$openjpeg/CMakeLists.txt"
@@ -21,9 +21,11 @@ then
     OPENJPEG_VERSION="$OPENJPEG_VERSION_MAJOR.$OPENJPEG_VERSION_MINOR.$OPENJPEG_VERSION_BUILD"
 else                            # openjpeg 2.0+
     openjpeg="openjp2"
-    OPENJPEG_VERSION="$(awk '/OPENJPEG_VERSION/ { print $3 }' \
-                        "$OPENJPEG_SOURCE_DIR/src/lib/$openjpeg/openjpeg.h" | \
-                        tr -d '"')"
+    verfile="openjpeg/CMakeLists.txt"
+    OPENJPEG_VERSION_MAJOR="$(sed -n -E '/^.*OPENJPEG_VERSION_MAJOR ([0-9]+)\)/s//\1/p' "$verfile")"
+    OPENJPEG_VERSION_MINOR="$(sed -n -E '/^.*OPENJPEG_VERSION_MINOR ([0-9]+)\)/s//\1/p' "$verfile")"
+    OPENJPEG_VERSION_BUILD="$(sed -n -E '/^.*OPENJPEG_VERSION_BUILD ([0-9]+)\)/s//\1/p' "$verfile")"
+    OPENJPEG_VERSION="$OPENJPEG_VERSION_MAJOR.$OPENJPEG_VERSION_MINOR.$OPENJPEG_VERSION_BUILD"
 fi
 
 if [ -z "$AUTOBUILD" ] ; then 
