@@ -23,10 +23,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include <openjpeg.h>
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+
+#include "opj_config.h"
+#include "openjpeg.h"
 
 #define J2K_CFMT 0
 
@@ -37,7 +39,7 @@ void info_callback(const char *msg, void *v);
 void error_callback(const char *msg, void *v) {
 (void)msg;
 (void)v;
-assert(0);
+puts(msg);
 }
 void warning_callback(const char *msg, void *v) {
 (void)msg;
@@ -54,25 +56,22 @@ int main(int argc, char *argv[])
 {
   const char * v = opj_version();
 
-  const OPJ_COLOR_SPACE color_space = CLRSPC_GRAY;
-  int numcomps = 1;
-  int i;
-  int image_width = 256;
-  int image_height = 256;
+  const OPJ_COLOR_SPACE color_space = OPJ_CLRSPC_GRAY;
+  unsigned int numcomps = 1;
+  unsigned int i;
+  unsigned int image_width = 256;
+  unsigned int image_height = 256;
 
   opj_cparameters_t parameters;
 
-  int subsampling_dx = 0;
-  int subsampling_dy = 0;
+  unsigned int subsampling_dx = 0;
+  unsigned int subsampling_dy = 0;
 
   opj_image_cmptparm_t cmptparm;
   opj_image_t *image;
-  opj_event_mgr_t event_mgr;
-  opj_cinfo_t* cinfo;
-  opj_cio_t *cio;
-  opj_bool bSuccess;
-  size_t codestream_length;
-  FILE *f;
+  opj_codec_t* l_codec = 00;
+  OPJ_BOOL bSuccess;
+	opj_stream_t *l_stream = 00;
   (void)argc;
   (void)argv;
 
@@ -92,38 +91,45 @@ int main(int argc, char *argv[])
 
   for (i = 0; i < image_width * image_height; i++)
     {
-    int compno;
+    unsigned int compno;
     for(compno = 0; compno < numcomps; compno++)
       {
       image->comps[compno].data[i] = 0;
       }
     }
 
-  event_mgr.error_handler = error_callback;
-  event_mgr.warning_handler = warning_callback;
-  event_mgr.info_handler = info_callback;
+  /* catch events using our callbacks and give a local context */
+  opj_set_info_handler(l_codec, info_callback,00);
+  opj_set_warning_handler(l_codec, warning_callback,00);
+  opj_set_error_handler(l_codec, error_callback,00);
 
-  cinfo = opj_create_compress(CODEC_J2K);
-  opj_set_event_mgr((opj_common_ptr)cinfo, &event_mgr, stderr);
+  l_codec = opj_create_compress(OPJ_CODEC_J2K);
+  opj_set_info_handler(l_codec, info_callback,00);
+  opj_set_warning_handler(l_codec, warning_callback,00);
+  opj_set_error_handler(l_codec, error_callback,00);
 
-  opj_setup_encoder(cinfo, &parameters, image);
+  opj_setup_encoder(l_codec, &parameters, image);
 
-  cio = opj_cio_open((opj_common_ptr)cinfo, NULL, 0);
-  assert( cio );
-  bSuccess = opj_encode(cinfo, cio, image, NULL);
+  l_stream = opj_stream_create_default_file_stream("testempty1.j2k",OPJ_FALSE);
+  assert(l_stream);
+  bSuccess = opj_start_compress(l_codec,image,l_stream);
+  if( !bSuccess )
+    {
+    opj_stream_destroy(l_stream);
+    opj_destroy_codec(l_codec);
+    opj_image_destroy(image);
+    return 0;
+    }
+
+  assert( bSuccess );
+  bSuccess = opj_encode(l_codec, l_stream);
+  assert( bSuccess );
+  bSuccess = opj_end_compress(l_codec, l_stream);
   assert( bSuccess );
 
-  codestream_length = (size_t)cio_tell(cio);
-  assert( codestream_length );
+  opj_stream_destroy(l_stream);
 
-  strcpy(parameters.outfile, "testempty1.j2k");
-  f = fopen(parameters.outfile, "wb");
-  assert( f );
-  fwrite(cio->buffer, 1, codestream_length, f);
-  fclose(f);
-
-  opj_cio_close(cio);
-  opj_destroy_compress(cinfo);
+  opj_destroy_codec(l_codec);
   opj_image_destroy(image);
 
   puts( "end" );
