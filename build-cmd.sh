@@ -66,10 +66,7 @@ pushd "$OPENJPEG_SOURCE_DIR"
             then # openjpeg 1.x
                  cp libopenjpeg/openjpeg.h "$stage/include/openjpeg/"
             else # openjpeg 2.x
-                 # There are a whole bunch of header files in src/lib/openjp2,
-                 # some of which are #included by openjpeg.h. Copy all of
-                 # them? ... nah.
-                 cp src/lib/$openjpeg/{openjpeg,opj_stdint,opj_config}.h \
+                 cp src/lib/$openjpeg/*.h \
                     "$stage/include/openjpeg/"
             fi
         ;;
