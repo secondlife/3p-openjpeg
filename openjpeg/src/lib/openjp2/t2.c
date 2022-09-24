@@ -455,7 +455,7 @@ OPJ_BOOL opj_t2_decode_packets(opj_tcd_t* tcd,
         }
         memset(first_pass_failed, OPJ_TRUE, l_image->numcomps * sizeof(OPJ_BOOL));
 
-        while (opj_pi_next(l_current_pi)) {
+        while (opj_pi_next(l_current_pi) && p_max_len > 0) {
             OPJ_BOOL skip_packet = OPJ_FALSE;
             JAS_FPRINTF(stderr,
                         "packet offset=00000166 prg=%d cmptno=%02d rlvlno=%02d prcno=%03d lyrno=%02d\n\n",
@@ -535,8 +535,16 @@ OPJ_BOOL opj_t2_decode_packets(opj_tcd_t* tcd,
                 }
             }
 
-            l_current_data += l_nb_bytes_read;
-            p_max_len -= l_nb_bytes_read;
+            if (p_max_len < l_nb_bytes_read)
+            {
+                // overflow?
+                p_max_len = 0;
+            }
+            else
+            {
+                l_current_data += l_nb_bytes_read;
+                p_max_len -= l_nb_bytes_read;
+            }
 
             /* INDEX >> */
 #ifdef TODO_MSD
