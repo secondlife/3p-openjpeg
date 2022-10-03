@@ -82,9 +82,9 @@ pushd "$OPENJPEG_SOURCE_DIR"
             # As of openjpeg 2.0, build products are now installed into
             # directories with version-stamped names. The actual pathname can
             # be found in install_manifest.txt.
-            # For backwards compatibility, rename lib$openjpeg.a to libopenjpeg.a.
-            mv -v "$(grep "/lib$openjpeg.a$" install_manifest.txt)" "$stage/lib/release/libopenjpeg.a"
-            mv -v "$(grep '/openjpeg.h$' install_manifest.txt)" "$stage/include/openjpeg/"
+            mv -v "$(grep "/libopenjp2.a$" install_manifest.txt)" "$stage/lib/release/libopenjp2.a"
+
+            cp src/lib/$openjpeg/*.h "$stage/include/openjpeg/"
         ;;
 
         linux*)
@@ -114,9 +114,9 @@ pushd "$OPENJPEG_SOURCE_DIR"
             # As of openjpeg 2.0, build products are now installed into
             # directories with version-stamped names. The actual pathname can
             # be found in install_manifest.txt.
-            # For backwards compatibility, rename lib$openjpeg.a to libopenjpeg.a.
-            mv -v "$(grep "/lib$openjpeg.a$" install_manifest.txt)" "$stage/lib/release/libopenjpeg.a"
-            mv -v "$(grep '/openjpeg.h$' install_manifest.txt)" "$stage/include/openjpeg/"
+            mv -v "$(grep "/libopenjp2.a$" install_manifest.txt)" "$stage/lib/release/libopenjp2.a"
+
+            cp src/lib/$openjpeg/*.h "$stage/include/openjpeg/"
         ;;
     esac
     mkdir -p "$stage/LICENSES"
