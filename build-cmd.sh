@@ -56,7 +56,12 @@ pushd "$OPENJPEG_SOURCE_DIR"
             cmake . -G "$AUTOBUILD_WIN_CMAKE_GEN" -DCMAKE_INSTALL_PREFIX=$stage \
                     -DCMAKE_C_FLAGS="$LL_BUILD_RELEASE"
 
-            build_sln "OPENJPEG.sln" "Release|$AUTOBUILD_WIN_VSPLATFORM" "$openjpeg"
+            msbuild.exe \
+                -t:$openjpeg \
+                -p:Configuration=Release \
+                -p:Platform=$AUTOBUILD_WIN_VSPLATFORM \
+                -p:PlatformToolset=v143 \
+                OPENJPEG.sln
             mkdir -p "$stage/lib/release"
 
             cp bin/Release/$openjpeg{.dll,.lib} "$stage/lib/release"
