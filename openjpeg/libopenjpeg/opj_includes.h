@@ -86,21 +86,48 @@ Most compilers implement their own version of this keyword ...
 	#endif
 #endif
 
-/* MSVC and Borland C do not have lrintf */
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-static INLINE long lrintf(float f){
+/* MSVC before 2013 and Borland C do not have lrintf */
+#if defined(_MSC_VER)
+#include <intrin.h>
+static INLINE long opj_lrintf(float f)
+{
 #ifdef _M_X64
-    return (long)((f>0.0f) ? (f + 0.5f):(f -0.5f));
-#else
+    return _mm_cvt_ss2si(_mm_load_ss(&f));
+
+    /* commented out line breaks many tests */
+    /* return (long)((f>0.0f) ? (f + 0.5f):(f -0.5f)); */
+#elif defined(_M_IX86)
     int i;
- 
     _asm{
         fld f
         fistp i
     };
- 
+
+    return i;
+#else
+    return (long)((f>0.0f) ? (f + 0.5f) : (f - 0.5f));
+#endif
+}
+#elif defined(__BORLANDC__)
+static INLINE long opj_lrintf(float f)
+{
+#ifdef _M_X64
+    return (long)((f > 0.0f) ? (f + 0.5f) : (f - 0.5f));
+#else
+    int i;
+
+    _asm {
+        fld f
+        fistp i
+    };
+
     return i;
 #endif
+}
+#else
+static INLINE long opj_lrintf(float f)
+{
+    return lrintf(f);
 }
 #endif
 
