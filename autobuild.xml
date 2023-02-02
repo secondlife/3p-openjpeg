@@ -64,7 +64,7 @@
           </map>
           <key>manifest</key>
           <array>
-            <string>lib/release/libopenjpeg.a</string>
+            <string>lib/release/libopenjp2.a</string>
           </array>
           <key>name</key>
           <string>darwin</string>
@@ -86,7 +86,7 @@
           </map>
           <key>manifest</key>
           <array>
-            <string>lib/release/libopenjpeg.a</string>
+            <string>lib/release/libopenjp2.a</string>
           </array>
           <key>name</key>
           <string>linux</string>
