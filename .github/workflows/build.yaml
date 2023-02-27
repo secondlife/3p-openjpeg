@@ -11,6 +11,10 @@ jobs:
             addrsize: "32"
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Setup Linux Build Dependencies
+        if: ${{ runner.os == 'Linux' }}
+        shell: bash
+        run: sudo apt-get install libwebp-dev
       - uses: secondlife/action-autobuild@v3
         with:
           addrsize: ${{ matrix.addrsize }}
