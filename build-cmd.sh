@@ -53,7 +53,12 @@ pushd "$OPENJPEG_SOURCE_DIR"
         windows*)
             load_vsvars
 
-            cmake . -G "$AUTOBUILD_WIN_CMAKE_GEN" -DCMAKE_INSTALL_PREFIX=$stage \
+            LL_PLATFORM="-A x64"
+            if [ "$AUTOBUILD_WIN_VSPLATFORM" = "Win32" ] ; then
+                LL_PLATFORM="-A win32"
+            fi
+
+            cmake . -G "$AUTOBUILD_WIN_CMAKE_GEN" $LL_PLATFORM -DCMAKE_INSTALL_PREFIX=$stage \
                     -DCMAKE_C_FLAGS="$LL_BUILD_RELEASE"
 
             msbuild.exe \
