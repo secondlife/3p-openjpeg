@@ -45,6 +45,9 @@ source_environment_tempfile="$stage/source_environment.sh"
 "$autobuild" source_environment > "$source_environment_tempfile"
 . "$source_environment_tempfile"
 
+# remove_cxxstd
+source "$(dirname "$AUTOBUILD_VARIABLES_FILE")/functions"
+
 build=${AUTOBUILD_BUILD_ID:=0}
 echo "${OPENJPEG_VERSION}.${build}" > "${stage}/VERSION.txt"
 
@@ -53,10 +56,20 @@ pushd "$OPENJPEG_SOURCE_DIR"
         windows*)
             load_vsvars
 
-            cmake . -G "$AUTOBUILD_WIN_CMAKE_GEN" -DCMAKE_INSTALL_PREFIX=$stage \
+            LL_PLATFORM="-A x64"
+            if [ "$AUTOBUILD_WIN_VSPLATFORM" = "Win32" ] ; then
+                LL_PLATFORM="-A win32"
+            fi
+
+            cmake . -G "$AUTOBUILD_WIN_CMAKE_GEN" $LL_PLATFORM -DCMAKE_INSTALL_PREFIX=$stage \
                     -DCMAKE_C_FLAGS="$LL_BUILD_RELEASE"
 
-            build_sln "OPENJPEG.sln" "Release|$AUTOBUILD_WIN_VSPLATFORM" "$openjpeg"
+            msbuild.exe \
+                -t:$openjpeg \
+                -p:Configuration=Release \
+                -p:Platform=$AUTOBUILD_WIN_VSPLATFORM \
+                -p:PlatformToolset=v143 \
+                OPENJPEG.sln
             mkdir -p "$stage/lib/release"
 
             cp bin/Release/$openjpeg{.dll,.lib} "$stage/lib/release"
@@ -74,7 +87,8 @@ pushd "$OPENJPEG_SOURCE_DIR"
         darwin*)
             cmake . -GXcode -D'CMAKE_OSX_ARCHITECTURES:STRING=$AUTOBUILD_CONFIGURE_ARCH' \
                     -D'BUILD_SHARED_LIBS:bool=off' -D'BUILD_CODEC:bool=off' \
-                    -DCMAKE_INSTALL_PREFIX=$stage -DCMAKE_C_FLAGS="$LL_BUILD_RELEASE"
+                    -DCMAKE_INSTALL_PREFIX=$stage \
+                    -DCMAKE_C_FLAGS="$(remove_cxxstd $LL_BUILD_RELEASE)"
             xcodebuild -configuration Release -target $openjpeg -project openjpeg.xcodeproj
             xcodebuild -configuration Release -target install -project openjpeg.xcodeproj
             mkdir -p "$stage/lib/release"
@@ -89,8 +103,8 @@ pushd "$OPENJPEG_SOURCE_DIR"
 
         linux*)
             # Force 4.6
-            export CC=gcc-4.6
-            export CXX=g++-4.6
+            #export CC=gcc-4.6
+            #export CXX=g++-4.6
 
             # Inhibit '--sysroot' nonsense
             export CPPFLAGS=""
@@ -99,7 +113,7 @@ pushd "$OPENJPEG_SOURCE_DIR"
                 -DCMAKE_INSTALL_PREFIX="$stage" \
                 -DBUILD_SHARED_LIBS:bool=off \
                 -DCMAKE_INSTALL_DEBUG_LIBRARIES=1 \
-                -DCMAKE_C_FLAGS="$LL_BUILD_RELEASE" .
+                -DCMAKE_C_FLAGS="$(remove_cxxstd $LL_BUILD_RELEASE)" .
             # From 1.4.0:
             # CFLAGS="-m32" CPPFLAGS="-m32" LDFLAGS="-m32" ./configure --target=i686-linux-gnu --prefix="$stage" --enable-png=no --enable-lcms1=no --enable-lcms2=no --enable-tiff=no
             make

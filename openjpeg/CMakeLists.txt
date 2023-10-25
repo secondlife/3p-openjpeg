@@ -73,7 +73,7 @@ set(OPENJPEG_LIBRARY_PROPERTIES
 # --------------------------------------------------------------------------
 # Path to additional CMake modules
 set(CMAKE_MODULE_PATH
-    ${${OPENJPEG_NAMESPACE}_SOURCE_DIR}/cmake
+    ${${OPENJPEG_NAMESPACE}_SOURCE_DIR}/CMake
     ${CMAKE_MODULE_PATH})
 
 # --------------------------------------------------------------------------
@@ -145,7 +145,7 @@ endif()
 #-----------------------------------------------------------------------------
 # Setup file for setting custom ctest vars
 configure_file(
-  ${${OPENJPEG_NAMESPACE}_SOURCE_DIR}/cmake/CTestCustom.cmake.in
+  ${${OPENJPEG_NAMESPACE}_SOURCE_DIR}/CMake/CTestCustom.cmake.in
   ${${OPENJPEG_NAMESPACE}_BINARY_DIR}/CTestCustom.cmake
   @ONLY
   )
@@ -309,13 +309,13 @@ install(EXPORT OpenJPEGTargets DESTINATION ${OPENJPEG_INSTALL_PACKAGE_DIR})
 if (${CMAKE_VERSION} VERSION_LESS 3.0)
   set(PACKAGE_INIT)
   set(PACKAGE_CMAKE_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_FULL_INCLUDEDIR})
-  configure_file( ${${OPENJPEG_NAMESPACE}_SOURCE_DIR}/cmake/OpenJPEGConfig.cmake.in
+  configure_file( ${${OPENJPEG_NAMESPACE}_SOURCE_DIR}/CMake/OpenJPEGConfig.cmake.in
     ${${OPENJPEG_NAMESPACE}_BINARY_DIR}/OpenJPEGConfig.cmake
     @ONLY
   )
 else()
   include(CMakePackageConfigHelpers)
-  configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/cmake/OpenJPEGConfig.cmake.in
+  configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/CMake/OpenJPEGConfig.cmake.in
     ${OPENJPEG_BINARY_DIR}/OpenJPEGConfig.cmake
     INSTALL_DESTINATION ${OPENJPEG_INSTALL_PACKAGE_DIR}
     PATH_VARS CMAKE_INSTALL_INCLUDEDIR)
@@ -327,7 +327,7 @@ install( FILES ${OPENJPEG_BINARY_DIR}/OpenJPEGConfig.cmake
 
 #-----------------------------------------------------------------------------
 
-include (cmake/OpenJPEGCPack.cmake)
+include (CMake/OpenJPEGCPack.cmake)
 
 #-----------------------------------------------------------------------------
 # pkgconfig support
