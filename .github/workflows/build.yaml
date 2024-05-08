@@ -15,7 +15,7 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         shell: bash
         run: sudo apt-get install libwebp-dev
-      - uses: secondlife/action-autobuild@v3
+      - uses: secondlife/action-autobuild@v4
         with:
           addrsize: ${{ matrix.addrsize }}
   release:
