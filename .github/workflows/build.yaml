@@ -8,18 +8,24 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows-2022, macos-12, ubuntu-22.04]
+        os: [windows-2022, macos-15, ubuntu-22.04]
         addrsize: ["64"]
         include:
           - os: windows-2022
             addrsize: "32"
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Setup Homebrew Packages
+        if: ${{ runner.os == 'macOS' }}
+        shell: bash
+        run: brew install ninja
       - name: Setup Linux Build Dependencies
         if: ${{ runner.os == 'Linux' }}
         shell: bash
-        run: sudo apt-get install libwebp-dev
-      - uses: secondlife/action-autobuild@v4
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install ninja-build libwebp-dev
+      - uses: secondlife/action-autobuild@v5
         with:
           addrsize: ${{ matrix.addrsize }}
   release:
